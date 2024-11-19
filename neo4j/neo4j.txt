@@ -1,0 +1,47 @@
+1. Wyświetlenie regionów oraz terytoriów dla konkretnego pracownika
+MATCH (e:Employee {firstName: "Margaret",lastName:"Peacock"})-[:IN_TERRITORY]->(t:Territory)-[:IN_REGION]->(r:Region)
+RETURN t, r
+2. Wyświetlenie listy pracowników, którzy sprzedali produkt konkretnemu klientowi
+MATCH (c:Customer {customerID:"CACTU"})-[:PURCHASED]->(o:Order)<-[:SOLD]-(e:Employee)
+RETURN e.firstName + ' '+ e.lastName AS EmployeeName
+3.Znalezienie wszystkich produktów i dostawców danej kategorii
+MATCH (p:Product)-[:PART_OF]->(c:Category {categoryName:"Dairy Products"}), (s:Supplier)-[:SUPPLIES]->(p)
+RETURN p, s
+4. Wyświetl wszystkich pracowników oraz produkty, których zamówienia były realizowane do USA
+MATCH path=(e:Employee)-[:SOLD]->(o:Order {shipCountry:"USA"})-[:ORDERS]->(p:Product) 
+RETURN path
+5. Wyświetl regiony znajdujące się w w danym terytorium
+MATCH path=(r:Region)<-[:IN_REGION]-(t:Territory) 
+RETURN path
+
+lab2
+1. MATCH (e:Employee)-[:SOLD]->(o:Order)-[:ORDERS]->(p:Product)
+RETURN e.firstName+" "+e.lastName AS Employee, o.orderID AS OrderID, p.productName AS Product
+ORDER BY Employee, o.orderID
+
+2. MATCH (p:Product)-[:PART_OF]->(c:Category),
+      (p)<-[:SUPPLIES]-(s:Supplier)
+RETURN p.productName AS Product, c.categoryName AS Category, s.companyName AS Supplier
+
+3. MATCH (e:Employee)-[:SOLD]->(o:Order)-[:ORDERS]->(p:Product {productName:"Chocolade"})
+WITH e.firstName+" "+e.lastName AS Employee, COUNT(p) AS Product
+ORDER BY Product DESC LIMIT 1
+MATCH (e)-[:SOLD]->(o)-[:ORDERS]->(p2:Product)
+WHERE p2.productName <> "Chocolade"
+WITH Product,Employee, COUNT(p2) AS otherProduct, p2.productName AS productName
+ORDER BY  otherProduct DESC,productName
+RETURN Employee, otherProduct, productName, Product AS ChocoladeCount LIMIT 1
+
+3b). MATCH (e:Employee)-[:SOLD]->(o:Order)-[:ORDERS]->(p:Product )
+RETURN e.firstName+" "+e.lastName AS Employee, COUNT(p) AS Product,p.productName
+ORDER BY p.productName
+
+4&5. MATCH path=(e:Employee)-[:REPORTS_TO]->(f:Employee) RETURN path
+
+6.MATCH (e:Employee)-[:SOLD]->(o:Order)
+RETURN e.firstName+" "+e.lastName AS Employee, COUNT(o) AS Orders
+
+6b). MATCH (e:Employee)-[:SOLD]->(o:Order)
+RETURN e.title AS Employee, COUNT(o) AS Orders
+
+7. MATCH (e:Employee)-[:IN_TERRITORY]->(t:Territory),(e)-[:SOLD]->(o:Order) RETURN e.firstName+" "+e.lastName AS Employee, COUNT(o) AS Solds, t.territoryDescription AS Country ORDER By Country
